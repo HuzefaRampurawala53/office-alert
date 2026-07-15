@@ -1,29 +1,28 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import socket from "../../services/socket";
+import { useState, useEffect, useRef } from "react";
+import api from "../../services/api";
 import "./ChatWindow.css";
-import {useRef} from 'react';
+
 function ChatWindow({
-  currentUser,
+  currentEmployeeId,
   selectedUser,
   messages,
   setMessages,
   typingUser,
   onClose,
+  socket,
 }) {
   const [message, setMessage] = useState("");
   const typingTimeout = useRef(null);
   const messagesEndRef = useRef(null);
+
   // ===============================
   // Load Chat History
   // ===============================
   useEffect(() => {
     if (!selectedUser) return;
 
-    axios
-      .get(
-        `http://localhost:4000/messages/${currentUser.trim().toLowerCase()}/${selectedUser.trim().toLowerCase()}`
-      )
+    api
+      .get(`/messages/${currentEmployeeId}/${selectedUser}`)
       .then((res) => {
         const history = res.data.map((msg) => ({
           id: msg.id,
@@ -41,7 +40,7 @@ function ChatWindow({
         setMessages(history);
       })
       .catch((err) => console.error(err));
-  }, [selectedUser, currentUser, setMessages]);
+  }, [selectedUser, currentEmployeeId, setMessages]);
 
   // ===============================
   // Send Message
@@ -50,8 +49,7 @@ function ChatWindow({
     if (!message.trim()) return;
 
     socket.emit("send_message", {
-      from: currentUser.trim().toLowerCase(),
-      to: selectedUser.trim().toLowerCase(),
+      to: selectedUser,
       message: message.trim(),
     });
 
@@ -64,13 +62,13 @@ function ChatWindow({
   useEffect(() => {
     messages.forEach((msg) => {
       if (
-        msg.to?.toLowerCase() === currentUser.toLowerCase() &&
+        msg.to?.toUpperCase() === currentEmployeeId.toUpperCase() &&
         !msg.seen
       ) {
         socket.emit("message_seen", { id: msg.id });
       }
     });
-  }, [messages, currentUser]);
+  }, [messages, currentEmployeeId, socket]);
 
   // ===============================
   // Auto-scroll to bottom
@@ -95,16 +93,16 @@ function ChatWindow({
         {messages
           .filter(
             (msg) =>
-              (msg.from.toLowerCase() === currentUser.toLowerCase() &&
-                msg.to.toLowerCase() === selectedUser.toLowerCase()) ||
-              (msg.from.toLowerCase() === selectedUser.toLowerCase() &&
-                msg.to.toLowerCase() === currentUser.toLowerCase())
+              (msg.from.toUpperCase() === currentEmployeeId.toUpperCase() &&
+                msg.to.toUpperCase() === selectedUser.toUpperCase()) ||
+              (msg.from.toUpperCase() === selectedUser.toUpperCase() &&
+                msg.to.toUpperCase() === currentEmployeeId.toUpperCase())
           )
           .map((msg) => (
             <div
               key={msg.id}
               className={
-                msg.from.toLowerCase() === currentUser.toLowerCase()
+                msg.from.toUpperCase() === currentEmployeeId.toUpperCase()
                   ? "my-message"
                   : "their-message"
               }
@@ -112,7 +110,7 @@ function ChatWindow({
               <p>{msg.message}</p>
               <span>
                 {msg.time}
-                {msg.from.toLowerCase() === currentUser.toLowerCase() && (
+                {msg.from.toUpperCase() === currentEmployeeId.toUpperCase() && (
                   <>
                     {" "}
                     {msg.seen ? <span className="seen-ticks">✓✓</span> : msg.delivered ? <span className="status-ticks">✓✓</span> : <span className="status-ticks">✓</span>}
@@ -122,7 +120,7 @@ function ChatWindow({
             </div>
           ))}
 
-        {typingUser && typingUser.toLowerCase() === selectedUser.toLowerCase() && (
+        {typingUser && typingUser.toUpperCase() === selectedUser.toUpperCase() && (
           <div className="typing-indicator">
             <span className="dot"></span>
             <span className="dot"></span>
@@ -137,32 +135,20 @@ function ChatWindow({
           value={message}
           placeholder="Type a message..."
           onChange={(e) => {
+            setMessage(e.target.value);
 
-    setMessage(e.target.value);
+            socket.emit("typing", {
+              to: selectedUser,
+            });
 
-    socket.emit("typing", {
+            clearTimeout(typingTimeout.current);
 
-        from: currentUser,
-
-        to: selectedUser,
-
-    });
-
-    clearTimeout(typingTimeout.current);
-
-    typingTimeout.current = setTimeout(() => {
-
-        socket.emit("stop_typing", {
-
-            from: currentUser,
-
-            to: selectedUser,
-
-        });
-
-    }, 2000);
-
-}}
+            typingTimeout.current = setTimeout(() => {
+              socket.emit("stop_typing", {
+                to: selectedUser,
+              });
+            }, 2000);
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               sendMessage();

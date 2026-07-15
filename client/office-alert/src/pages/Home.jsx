@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import socket from "../services/socket";
 import { notify, clearNotificationCount } from "../utils/NotificationManager";
 
 import "./Home.css";
@@ -10,16 +9,18 @@ import UserCard from "../components/UserCard";
 import Notification from "../components/Notifications/Notification";
 import ChatWindow from "../components/Chat/ChatWindow";
 
-function Home({ username, onLogout }) {
+function Home({ employee, socket, onLogout }) {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [caller, setCaller] = useState("");
   const [showNotification, setShowNotification] = useState(false);
-  const [typingUser,setTypingUser]=useState("");
+  const [typingUser, setTypingUser] = useState("");
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
 
   const bellRef = useRef(new Audio(bellSound));
+
+  const employeeId = employee.employee_id;
 
   // ===========================
   // ONLINE USERS
@@ -32,18 +33,18 @@ function Home({ username, onLogout }) {
     return () => {
       socket.off("online_users");
     };
-  }, []);
+  }, [socket]);
 
   // ===========================
   // BELL
   // ===========================
   useEffect(() => {
     socket.on("bell_ring", (data) => {
-      setCaller(data.from);
+      setCaller(data.fromName || data.from);
       setShowNotification(true);
 
       // Windows notification (manager checks focus internally)
-      notify({ type: "bell", sender: data.from });
+      notify({ type: "bell", sender: data.fromName || data.from });
 
       bellRef.current.currentTime = 0;
       bellRef.current.play();
@@ -52,7 +53,7 @@ function Home({ username, onLogout }) {
     return () => {
       socket.off("bell_ring");
     };
-  }, []);
+  }, [socket]);
 
   // ===========================
   // RECEIVE CHAT
@@ -66,7 +67,7 @@ function Home({ username, onLogout }) {
       socket.emit("message_delivered", { id: data.id });
 
       // Only notify if someone ELSE sent the message
-      if (data.from.toLowerCase() !== username.toLowerCase()) {
+      if (data.from.toUpperCase() !== employeeId.toUpperCase()) {
         notify({ type: "message", sender: data.from, body: data.message });
       }
     });
@@ -74,30 +75,25 @@ function Home({ username, onLogout }) {
     return () => {
       socket.off("receive_message");
     };
-  }, [username]);
-  useEffect(()=>{
+  }, [socket, employeeId]);
 
-socket.on("user_typing",(data)=>{
+  // ===========================
+  // TYPING
+  // ===========================
+  useEffect(() => {
+    socket.on("user_typing", (data) => {
+      setTypingUser(data.from);
+    });
 
-setTypingUser(data.from);
+    socket.on("user_stop_typing", () => {
+      setTypingUser("");
+    });
 
-});
-
-socket.on("user_stop_typing",()=>{
-
-setTypingUser("");
-
-});
-
-return()=>{
-
-socket.off("user_typing");
-
-socket.off("user_stop_typing");
-
-};
-
-},[]);
+    return () => {
+      socket.off("user_typing");
+      socket.off("user_stop_typing");
+    };
+  }, [socket]);
 
   // ===========================
   // DELIVERED / SEEN UPDATES
@@ -123,7 +119,8 @@ socket.off("user_stop_typing");
       socket.off("message_delivered_update");
       socket.off("message_seen_update");
     };
-  }, []);
+  }, [socket]);
+
   // ===========================
   // OPEN CHAT FROM NOTIFICATION
   // ===========================
@@ -155,9 +152,9 @@ socket.off("user_stop_typing");
   // ===========================
   // CHAT
   // ===========================
-  const openChat = (user) => {
-    setSelectedUser(user);
-    clearNotificationCount(user);
+  const openChat = (userEmpId) => {
+    setSelectedUser(userEmpId);
+    clearNotificationCount(userEmpId);
   };
 
   const closeChat = () => {
@@ -168,6 +165,13 @@ socket.off("user_stop_typing");
     <div className="home-container">
 
       <div className="top-bar">
+        <div className="user-badge">
+          <span className="badge-id">{employeeId}</span>
+          <span className="badge-name">{employee.name}</span>
+          {employee.department && (
+            <span className="badge-dept">{employee.department}</span>
+          )}
+        </div>
         <button
           className="logout-btn"
           onClick={onLogout}
@@ -177,7 +181,7 @@ socket.off("user_stop_typing");
       </div>
 
       <h1 className="welcome-title">
-        Welcome, {username}
+        Welcome, {employee.name}
       </h1>
 
       <div className="users-panel">
@@ -190,10 +194,11 @@ socket.off("user_stop_typing");
 
           {onlineUsers.map((user) => (
             <UserCard
-              key={user}
+              key={user.employee_id}
               user={user}
-              currentUser={username}
+              currentEmployeeId={employeeId}
               openChat={openChat}
+              socket={socket}
             />
           ))}
 
@@ -208,20 +213,14 @@ socket.off("user_stop_typing");
 
       {selectedUser && (
         <ChatWindow
-
-currentUser={username}
-
-selectedUser={selectedUser}
-
-messages={messages}
-
-setMessages={setMessages}
-
-typingUser={typingUser}
-
-onClose={closeChat}
-
-/>
+          currentEmployeeId={employeeId}
+          selectedUser={selectedUser}
+          messages={messages}
+          setMessages={setMessages}
+          typingUser={typingUser}
+          onClose={closeChat}
+          socket={socket}
+        />
       )}
 
     </div>

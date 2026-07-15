@@ -1,64 +1,72 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import socket from "./services/socket";
+import { createSocket, disconnectSocket, getSocket } from "./services/socket";
 
 function App() {
-  const [username, setUsername] = useState("");
+  const [employee, setEmployee] = useState(null);
+  const [socket, setSocket] = useState(null);
+  const socketRef = useRef(null);
 
-  // Read username from localStorage
+  // Restore session from localStorage
   useEffect(() => {
-    const savedUser = localStorage.getItem("username");
+    const savedToken = localStorage.getItem("token");
+    const savedEmployee = localStorage.getItem("employee");
 
-    if (savedUser) {
-      setUsername(savedUser.trim().toLowerCase());
+    if (savedToken && savedEmployee) {
+      try {
+        const emp = JSON.parse(savedEmployee);
+        setEmployee(emp);
+
+        // Reconnect socket with saved token
+        const sock = createSocket(savedToken);
+        socketRef.current = sock;
+        setSocket(sock);
+      } catch {
+        // Corrupted data — clear and go to login
+        localStorage.removeItem("token");
+        localStorage.removeItem("employee");
+      }
     }
   }, []);
-  //For asking notification
-  useEffect(() => {
 
+  // Ask for notification permission
+  useEffect(() => {
     if ("Notification" in window) {
-
-        Notification.requestPermission();
-
+      Notification.requestPermission();
     }
+  }, []);
 
-}, []);
-  // Socket connection and user join handling
-  useEffect(() => {
-    const handleConnect = () => {
-      console.log("Connected:", socket.id);
-      if (username) {
-        socket.emit("user_join", username);
-      }
-    };
+  // Handle successful login
+  const handleLogin = (emp, token) => {
+    setEmployee(emp);
 
-    socket.on("connect", handleConnect);
+    const sock = createSocket(token);
+    socketRef.current = sock;
+    setSocket(sock);
+  };
 
-    // If socket is already connected when this runs
-    if (socket.connected) {
-      handleConnect();
-    }
-
-    return () => {
-      socket.off("connect", handleConnect);
-    };
-  }, [username]);
-
+  // Handle logout
   const handleLogout = () => {
-    localStorage.removeItem("username");
-    setUsername("");
+    disconnectSocket();
+    socketRef.current = null;
+    setSocket(null);
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("employee");
+    setEmployee(null);
   };
 
   return (
     <>
-      {username ? (
+      {employee && socket ? (
         <Home
-          username={username}
+          employee={employee}
+          socket={socket}
           onLogout={handleLogout}
         />
       ) : (
-        <Login onLogin={setUsername} />
+        <Login onLogin={handleLogin} />
       )}
     </>
   );

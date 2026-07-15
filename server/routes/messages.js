@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
+const authMiddleware = require("../middleware/auth");
 
-router.get("/:user1/:user2", async (req, res) => {
-  const user1 = req.params.user1.trim().toLowerCase();
-  const user2 = req.params.user2.trim().toLowerCase();
+// Protected: requires valid JWT
+router.get("/:user1/:user2", authMiddleware, async (req, res) => {
+  const user1 = req.params.user1.trim().toUpperCase();
+  const user2 = req.params.user2.trim().toUpperCase();
 
   try {
     const result = await db.query(

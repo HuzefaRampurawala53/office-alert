@@ -1,10 +1,9 @@
 import "./UserCard.css";
-import socket from "../services/socket";
 
-function UserCard({ user, currentUser, openChat }) {
+function UserCard({ user, currentEmployeeId, openChat, socket }) {
 
   const handleBell = () => {
-    socket.emit("ring_user", user);
+    socket.emit("ring_user", user.employee_id);
   };
 
   return (
@@ -16,15 +15,15 @@ function UserCard({ user, currentUser, openChat }) {
 
         <div>
 
-          <h3>{user}</h3>
+          <h3>{user.name}</h3>
 
-          <p>Online</p>
+          <p>{user.employee_id}</p>
 
         </div>
 
       </div>
 
-      {user !== currentUser ? (
+      {user.employee_id !== currentEmployeeId ? (
 
         <div className="actions">
 
@@ -38,7 +37,7 @@ function UserCard({ user, currentUser, openChat }) {
 
           <button
             className="message-btn"
-            onClick={() => openChat(user)}
+            onClick={() => openChat(user.employee_id)}
             title="Message"
           >
             💬
