@@ -1,0 +1,102 @@
+body {
+    margin: 0;
+    background: #7c8cad;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.home-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 25px;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* ── Top bar ── */
+.top-bar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.logout-btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 8px;
+    background: #ef4444;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.logout-btn:hover {
+    background: #dc2626;
+}
+
+/* ── Welcome title ── */
+.welcome-title {
+    text-align: center;
+    font-size: 42px;
+    font-weight: 700;
+    color: #fff;
+    margin: 10px 0 25px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    letter-spacing: -0.5px;
+}
+
+/* ── Users panel (left-aligned) ── */
+.users-panel {
+    width: 260px;
+}
+
+.panel-heading {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #e2e8f0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.users-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.typing{
+
+padding:10px 20px;
+
+font-size:13px;
+
+font-style:italic;
+
+color:#666;
+
+animation:blink .8s infinite;
+
+}
+
+@keyframes blink{
+
+0%{
+
+opacity:.3;
+
+}
+
+50%{
+
+opacity:1;
+
+}
+
+100%{
+
+opacity:.3;
+
+}
+
+}
