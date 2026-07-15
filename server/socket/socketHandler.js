@@ -20,7 +20,7 @@ function socketHandler(io) {
     });
     // ==========================
     // USER JOIN
-    // ==========================
+    // =============================
     socket.on("user_join", (username) => {
       const normalizedUsername = username.trim().toLowerCase();
       socket.username = normalizedUsername;
