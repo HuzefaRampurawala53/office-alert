@@ -49,13 +49,18 @@ socketHandler(io);
 // =====================
 // START
 // =====================
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 server.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
 
-// DB connection check
+const initDb = require("./config/initDb");
+
+// DB connection check and schema initialization
 db.query("SELECT NOW()")
-  .then((res) => console.log("✅ PostgreSQL Connected:", res.rows[0]))
+  .then(async (res) => {
+    console.log("✅ PostgreSQL Connected:", res.rows[0]);
+    await initDb();
+  })
   .catch((err) => console.error("❌ PostgreSQL Error:", err));
