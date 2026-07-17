@@ -20,9 +20,13 @@ app.get("/", (req, res) => {
 // =====================
 const authRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messages");
+const roomRoutes = require("./routes/rooms");
+const adminRoutes = require("./routes/admin");
 
 app.use("/auth", authRoutes);
 app.use("/messages", messageRoutes);
+app.use("/rooms", roomRoutes);
+app.use("/admin", adminRoutes);
 
 // =====================
 // SERVER + SOCKET.IO

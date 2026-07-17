@@ -11,8 +11,14 @@ export function createSocket(token) {
     return socket;
   }
 
-  socket = io("https://office-alert.onrender.com", {
-    auth: { token },
+  const socketURL = window.location.hostname === "localhost"
+    ? "http://localhost:4000"
+    : "https://office-alert.onrender.com";
+
+  const presenceStatus = localStorage.getItem("presence_status") || "online";
+
+  socket = io(socketURL, {
+    auth: { token, presenceStatus },
   });
 
   return socket;

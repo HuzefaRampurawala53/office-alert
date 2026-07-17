@@ -14,20 +14,20 @@ let groupTimers = {};     // sender -> debounce timer
  * body   : text to display (message content or call text)
  */
 export function notify({ type, sender, body }) {
-  console.log("🔔 NotificationManager.notify() called:", { type, sender, body });
+  console.log("NotificationManager.notify() called:", { type, sender, body });
 
   // ── Guard: permission ──
-  if (!("Notification" in window)) { console.log("❌ Notification API not supported"); return; }
-  if (Notification.permission !== "granted") { console.log("❌ Permission not granted:", Notification.permission); return; }
+  if (!("Notification" in window)) { console.log("Notification API not supported"); return; }
+  if (Notification.permission !== "granted") { console.log("Permission not granted:", Notification.permission); return; }
 
   // ── Guard: app is focused → no Windows notification ──
-  console.log("👁 document.hidden:", document.hidden);
-  if (!document.hidden) { console.log("⏭ App is focused, skipping notification"); return; }
+  console.log("document.hidden:", document.hidden);
+  if (!document.hidden) { console.log("App is focused, skipping notification"); return; }
 
   // ── Bell notifications: show immediately, no grouping ──
   if (type === "bell") {
     showWindowsNotification({
-      title: "🔔 Office Alert",
+      title: "Office Alert",
       body: `${sender} is calling you.`,
       tag: `bell-${sender}`,
       sender,
@@ -46,7 +46,7 @@ export function notify({ type, sender, body }) {
   groupTimers[sender] = setTimeout(() => {
     const count = pendingCounts[sender];
 
-    const title = `💬 ${sender}`;
+    const title = sender;
     const displayBody =
       count > 1 ? `${count} new messages` : body;
 
@@ -75,15 +75,15 @@ export function clearNotificationCount(sender) {
 
 // ── Internal: create the actual Windows notification ──
 function showWindowsNotification({ title, body, tag, sender }) {
-  console.log("✅ Creating Windows notification:", { title, body, tag });
+  console.log("Creating Windows notification:", { title, body, tag });
 
   const notification = new Notification(title, {
     body,
     tag, // same tag = replaces existing notification
   });
 
-  notification.onshow = () => console.log("✅ Notification shown!");
-  notification.onerror = (e) => console.log("❌ Notification error:", e);
+  notification.onshow = () => console.log("Notification shown!");
+  notification.onerror = (e) => console.log("Notification error:", e);
 
   notification.onclick = () => {
     window.focus();

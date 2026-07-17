@@ -100,17 +100,12 @@
 }
 
 .their-message{
-
     align-self:flex-start;
-
     background:white;
-
+    color:#1f2937;
     padding:10px 14px;
-
     border-radius:18px 18px 18px 4px;
-
     max-width:70%;
-
 }
 
 .my-message span,
@@ -171,6 +166,27 @@
     40%{ transform:scale(1); opacity:1; }
 }
 
+.message-sender-name {
+    display: block;
+    font-size: 11px;
+    font-weight: bold;
+    color: #4b5563;
+    margin-bottom: 2px;
+}
+
+.typing-container-badge {
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.typing-name {
+    font-size: 11px;
+    color: #6b7280;
+    margin-left: 4px;
+}
+
 .chat-input{
 
     display:flex;
@@ -184,17 +200,12 @@
 }
 
 .chat-input input{
-
     flex:1;
-
     border:1px solid #ddd;
-
     border-radius:10px;
-
     padding:10px;
-
     outline:none;
-
+    color:#1f2937;
 }
 
 .chat-input button{

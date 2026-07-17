@@ -1,7 +1,11 @@
 import axios from "axios";
 
+const baseURL = window.location.hostname === "localhost" 
+  ? "http://localhost:4000" 
+  : "https://office-alert.onrender.com";
+
 const api = axios.create({
-  baseURL: "https://office-alert.onrender.com",
+  baseURL,
 });
 
 // Attach JWT token to every request

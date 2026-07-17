@@ -1,136 +1,739 @@
+/* =============================================
+   WORKSPACE DASHBOARD STYLES (HOME)
+   ============================================= */
+
 body {
-    margin: 0;
-    background: #7c8cad;
-    font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: linear-gradient(135deg, #0b091a 0%, #151233 100%);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: #f3f4f6;
+  min-height: 100vh;
 }
 
 .home-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 20px 25px;
-    min-height: 100vh;
-    box-sizing: border-box;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-/* ── Top bar ── */
+/* ── Top Bar ── */
 .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  background: transparent;
+  backdrop-filter: none;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 20px;
 }
 
-.user-badge {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(8px);
-    padding: 8px 16px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+.company-logo-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-self: start;
+}
+
+.company-logo-section h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.company-name-badge {
+  background: rgba(124, 108, 240, 0.12);
+  color: #a5b4fc;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid rgba(124, 108, 240, 0.25);
+}
+
+.navigation-tabs {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  justify-self: end;
+}
+
+.tab-pill-box {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tab-pill {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-pill:hover {
+  color: #ffffff;
+}
+
+.tab-pill.active {
+  background: linear-gradient(135deg, #7c6cf0, #6366f1);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.home-logo-img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.user-profile-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  justify-self: center;
+}
+
+.profile-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+
+.profile-id-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Status toggle button */
+.status-toggle-btn {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.status-toggle-btn.online {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-toggle-btn.online:hover {
+  background: rgba(34, 197, 94, 0.25);
+}
+
+.status-toggle-btn.offline {
+  background: rgba(156, 163, 175, 0.15);
+  color: #9ca3af;
+  border: 1px solid rgba(156, 163, 175, 0.3);
+}
+
+.status-toggle-btn.offline:hover {
+  background: rgba(156, 163, 175, 0.25);
 }
 
 .badge-id {
-    font-size: 12px;
-    font-weight: 700;
-    color: #7c6cf0;
-    background: rgba(124, 108, 240, 0.15);
-    padding: 3px 8px;
-    border-radius: 6px;
-    letter-spacing: 0.5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #7c6cf0;
+  background: rgba(124, 108, 240, 0.15);
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
 }
 
-.badge-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #ffffff;
-}
-
-.badge-dept {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
-    border-left: 1px solid rgba(255, 255, 255, 0.2);
-    padding-left: 10px;
+/* Responsive Header */
+@media (max-width: 1200px) {
+  .top-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0;
+  }
+  
+  .company-logo-section {
+    justify-self: center;
+  }
+  
+  .user-profile-center {
+    margin: 8px 0;
+  }
+  
+  .navigation-tabs {
+    justify-self: center;
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .logout-btn {
-    padding: 8px 18px;
-    border: none;
-    border-radius: 8px;
-    background: #ef4444;
-    color: white;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 10px;
+  background: #ef4444;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .logout-btn:hover {
-    background: #dc2626;
+  background: #dc2626;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
 }
 
-/* ── Welcome title ── */
-.welcome-title {
-    text-align: center;
-    font-size: 42px;
-    font-weight: 700;
-    color: #fff;
-    margin: 10px 0 25px;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    letter-spacing: -0.5px;
+/* =============================================
+   CHAT VIEW LAYOUT
+   ============================================= */
+
+.chat-layout {
+  display: flex;
+  flex: 1;
+  background: transparent;
+  border-radius: 20px;
+  border: none;
+  min-height: 500px;
+  overflow: hidden;
 }
 
-/* ── Users panel (left-aligned) ── */
-.users-panel {
-    width: 260px;
+.sidebar-chat-panel {
+  width: 320px;
+  background: transparent;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 20px 20px 0;
+  gap: 24px;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
-.panel-heading {
-    margin: 0 0 12px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #e2e8f0;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.channels-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.channel-row {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.channel-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+.channel-row.active {
+  background: rgba(124, 108, 240, 0.15);
+  color: #a5b4fc;
+}
+
+.hash-symbol {
+  color: rgba(255, 255, 255, 0.3);
+  margin-right: 8px;
+  font-weight: 700;
 }
 
 .users-list {
-    display: flex;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Rewrite UserCard for Dark theme list & landing grid */
+.users-list .user-card,
+.landing-coworkers-grid .user-card {
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.users-list .user-card:hover,
+.landing-coworkers-grid .user-card:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.users-list .user-card h3,
+.landing-coworkers-grid .user-card h3 {
+  color: #ffffff;
+}
+
+.users-list .user-card p,
+.landing-coworkers-grid .user-card p {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.users-list .bell-btn,
+.users-list .message-btn,
+.landing-coworkers-grid .bell-btn,
+.landing-coworkers-grid .message-btn {
+  color: #ffffff;
+}
+
+/* Chat Main Landing Panel Re-design */
+.chat-main-landing {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 24px 80px 24px;
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.landing-welcome-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 40px;
+  text-align: center;
+  letter-spacing: -0.5px;
+}
+
+.landing-coworkers-section {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.landing-coworkers-section .section-subtitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.landing-coworkers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+/* Style the workspace code in the corner */
+.workspace-code-corner {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.workspace-code-corner code {
+  font-family: monospace;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #a5b4fc;
+  margin-left: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.no-coworkers-msg {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+  margin: 16px 0;
+}
+
+/* =============================================
+   ADMIN CONSOLE VIEW
+   ============================================= */
+
+.admin-console-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-header-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.admin-toast {
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  text-align: center;
+  animation: slideUp 0.3s ease-out;
+}
+
+.admin-toast.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+}
+
+.admin-toast.success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #a7f3d0;
+}
+
+/* Stats Cards */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 24px;
+  border-radius: 16px;
+}
+
+.stat-icon {
+  font-size: 36px;
+}
+
+.stat-data h4 {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-data h3 {
+  margin: 4px 0 0 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* Admin split layout */
+.admin-split-view {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+@media (max-width: 900px) {
+  .admin-split-view {
     flex-direction: column;
-    gap: 8px;
-}
-.typing{
-
-padding:10px 20px;
-
-font-size:13px;
-
-font-style:italic;
-
-color:#666;
-
-animation:blink .8s infinite;
-
+  }
+  .sidebar-chat-panel {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .chat-layout {
+    flex-direction: column;
+  }
 }
 
-@keyframes blink{
-
-0%{
-
-opacity:.3;
-
+.admin-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 24px;
+  box-sizing: border-box;
 }
 
-50%{
-
-opacity:1;
-
+.admin-left-col {
+  width: 360px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-100%{
-
-opacity:.3;
-
+.room-manager-box {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
+.employee-table-box {
+  flex: 1;
+}
+
+.card-desc-subtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+  margin: -8px 0 8px 0;
+  line-height: 1.4;
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.admin-input:focus {
+  border-color: #7c6cf0;
+  background: rgba(124, 108, 240, 0.06);
+}
+
+.admin-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #7c6cf0, #6366f1);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-btn:hover {
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+  transform: translateY(-1px);
+}
+
+.workspace-details-card {
+  margin-top: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.workspace-details-card h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.details-list div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.details-list div span {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.ws-code-tag {
+  color: #a5b4fc;
+  font-family: monospace;
+  background: rgba(165, 180, 252, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Directory Table */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
+.employee-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+.employee-admin-table th {
+  padding: 14px 16px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+.employee-admin-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  vertical-align: middle;
+}
+
+.row-suspended td {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.role-pill {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.role-pill.admin {
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.role-pill.employee {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.status-pill {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.status-pill.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: #34d399;
+}
+
+.status-pill.suspended {
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+}
+
+.action-btns-group {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-action {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-action.suspend {
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+}
+
+.btn-action.suspend:hover {
+  background: #f59e0b;
+  color: #ffffff;
+}
+
+.btn-action.activate {
+  background: rgba(16, 185, 129, 0.1);
+  color: #34d399;
+}
+
+.btn-action.activate:hover {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.btn-action.delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+}
+
+.btn-action.delete:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.owner-label {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 12px;
+  font-style: italic;
+}
+
+.close-chat-btn {
+  background: transparent !important;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.close-chat-btn:hover {
+  transform: scale(1.1);
+  color: #ef4444;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
