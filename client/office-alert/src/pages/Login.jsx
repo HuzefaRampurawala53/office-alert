@@ -79,7 +79,8 @@ function Login({ onLogin }) {
 
       onLogin(employee, token);
     } catch (err) {
-      window.location.reload();
+      const message = err.response?.data?.error || "Invalid Employee ID/Email or password.";
+      setError(message);
     } finally {
       setLoading(false);
     }

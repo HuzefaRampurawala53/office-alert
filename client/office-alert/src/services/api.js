@@ -1,6 +1,14 @@
 import axios from "axios";
 
-const baseURL = window.location.hostname === "localhost" 
+const isLocalhost = 
+  window.location.hostname === "localhost" || 
+  window.location.hostname === "127.0.0.1" || 
+  window.location.hostname === "[::1]" ||
+  window.location.hostname.startsWith("192.168.") ||
+  window.location.hostname.startsWith("10.") ||
+  window.location.hostname.startsWith("172.");
+
+const baseURL = isLocalhost 
   ? "http://localhost:4000" 
   : "https://office-alert.onrender.com";
 
@@ -26,7 +34,12 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    if (
+      error.response && 
+      error.response.status === 401 && 
+      error.config && 
+      !error.config.url?.includes("/auth/login")
+    ) {
       // Token expired or invalid — clear storage and redirect to login
       localStorage.removeItem("token");
       localStorage.removeItem("employee");

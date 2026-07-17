@@ -252,6 +252,24 @@ function socketHandler(io) {
     });
 
     // ==========================
+    // BATCH MESSAGE SEEN (MARK CHAT SEEN)
+    // ==========================
+    socket.on("mark_chat_seen", async ({ unseenIds }) => {
+      if (!Array.isArray(unseenIds) || unseenIds.length === 0) return;
+      try {
+        await db.query(
+          `UPDATE messages 
+           SET seen = true 
+           WHERE id = ANY($1) AND organization_id = $2`,
+          [unseenIds, organization_id]
+        );
+        socket.to(`org_${organization_id}`).emit("chat_seen_update", { unseenIds });
+      } catch (err) {
+        console.error("❌ Error marking messages seen:", err);
+      }
+    });
+
+    // ==========================
     // DISCONNECT
     // ==========================
     socket.on("disconnect", () => {

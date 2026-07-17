@@ -70,19 +70,22 @@ function ChatWindow({
   };
 
   // ===============================
-  // Mark Private Messages as Seen
+  // Mark Private Messages as Seen (Batched)
   // ===============================
   useEffect(() => {
     if (selectedChat && selectedChat.type === "private") {
-      messages.forEach((msg) => {
-        if (
-          msg.to?.toUpperCase() === currentEmployeeId.toUpperCase() &&
-          msg.from?.toUpperCase() === selectedChat.id.toUpperCase() &&
-          !msg.seen
-        ) {
-          socket.emit("message_seen", { id: msg.id });
-        }
-      });
+      const unseenIds = messages
+        .filter(
+          (msg) =>
+            msg.to?.toUpperCase() === currentEmployeeId.toUpperCase() &&
+            msg.from?.toUpperCase() === selectedChat.id.toUpperCase() &&
+            !msg.seen
+        )
+        .map((msg) => msg.id);
+
+      if (unseenIds.length > 0) {
+        socket.emit("mark_chat_seen", { unseenIds });
+      }
     }
   }, [messages, currentEmployeeId, selectedChat, socket]);
 

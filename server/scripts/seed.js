@@ -71,6 +71,23 @@ async function seed() {
     `);
     console.log("✅ messages table created.");
 
+    // Create indexes for performance optimization
+    await db.query(`
+      CREATE INDEX idx_messages_room 
+      ON messages (organization_id, room_id, created_at);
+    `);
+
+    await db.query(`
+      CREATE INDEX idx_messages_private_sender 
+      ON messages (organization_id, sender, receiver, created_at);
+    `);
+
+    await db.query(`
+      CREATE INDEX idx_messages_private_receiver 
+      ON messages (organization_id, receiver, sender, created_at);
+    `);
+    console.log("✅ messages indexes created.");
+
     // Seed default organization
     const orgResult = await db.query(`
       INSERT INTO organizations (company_name, company_email, workspace_code)

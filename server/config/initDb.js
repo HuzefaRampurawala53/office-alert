@@ -60,6 +60,22 @@ async function initDb() {
       );
     `);
 
+    // Create indexes for performance optimization
+    await db.query(`
+      CREATE INDEX IF NOT EXISTS idx_messages_room 
+      ON messages (organization_id, room_id, created_at);
+    `);
+
+    await db.query(`
+      CREATE INDEX IF NOT EXISTS idx_messages_private_sender 
+      ON messages (organization_id, sender, receiver, created_at);
+    `);
+
+    await db.query(`
+      CREATE INDEX IF NOT EXISTS idx_messages_private_receiver 
+      ON messages (organization_id, receiver, sender, created_at);
+    `);
+
     console.log("✅ Database schema initialized successfully.");
   } catch (err) {
     console.error("❌ Error initializing database schema:", err);

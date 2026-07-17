@@ -212,9 +212,19 @@ function Home({ employee, socket, onLogout }) {
       );
     });
 
+    socket.on("chat_seen_update", ({ unseenIds }) => {
+      const idSet = new Set(unseenIds);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          idSet.has(msg.id) ? { ...msg, seen: true } : msg
+        )
+      );
+    });
+
     return () => {
       socket.off("message_delivered_update");
       socket.off("message_seen_update");
+      socket.off("chat_seen_update");
     };
   }, [socket]);
 
