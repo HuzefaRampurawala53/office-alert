@@ -27,14 +27,17 @@ router.post("/register-company", async (req, res) => {
     return res.status(400).json({ error: "All fields are required." });
   }
 
+  const client = await db.connect();
   try {
+    await client.query("BEGIN");
     // Check if company email already exists in organizations
-    const existingOrg = await db.query(
+    const existingOrg = await client.query(
       "SELECT id FROM organizations WHERE company_email = $1",
       [company_email.trim().toLowerCase()]
     );
 
     if (existingOrg.rows.length > 0) {
+      await client.query("ROLLBACK");
       return res.status(409).json({ error: "A company with this email is already registered." });
     }
 
@@ -43,7 +46,7 @@ router.post("/register-company", async (req, res) => {
     let codeExists = true;
     while (codeExists) {
       workspaceCode = generateWorkspaceCode(company_name);
-      const codeCheck = await db.query(
+      const codeCheck = await client.query(
         "SELECT id FROM organizations WHERE workspace_code = $1",
         [workspaceCode]
       );
@@ -53,7 +56,7 @@ router.post("/register-company", async (req, res) => {
     }
 
     // Create organization
-    const orgResult = await db.query(
+    const orgResult = await client.query(
       `INSERT INTO organizations (company_name, company_email, workspace_code)
        VALUES ($1, $2, $3)
        RETURNING id, company_name, workspace_code`,
@@ -64,7 +67,7 @@ router.post("/register-company", async (req, res) => {
 
     // Create admin employee
     const passwordHash = await bcrypt.hash(password, 10);
-    const adminResult = await db.query(
+    const adminResult = await client.query(
       `INSERT INTO employees (organization_id, employee_id, name, email, password_hash, role, department)
        VALUES ($1, 'ADMIN', $2, $3, $4, 'admin', 'Management')
        RETURNING id, employee_id, name, email, role, department`,
@@ -74,11 +77,13 @@ router.post("/register-company", async (req, res) => {
     const adminEmployee = adminResult.rows[0];
 
     // Create default 'General' room for the workspace
-    await db.query(
+    await client.query(
       `INSERT INTO rooms (organization_id, room_name, created_by)
        VALUES ($1, 'General', $2)`,
       [organization.id, adminEmployee.id]
     );
+
+    await client.query("COMMIT");
 
     res.status(201).json({
       success: true,
@@ -89,8 +94,11 @@ router.post("/register-company", async (req, res) => {
     });
 
   } catch (err) {
+    await client.query("ROLLBACK");
     console.error("Company registration error:", err);
     res.status(500).json({ error: "Server error during company registration." });
+  } finally {
+    client.release();
   }
 });
 

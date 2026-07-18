@@ -33,6 +33,38 @@ async function initDb() {
       );
     `);
 
+    // Migrate databases created by the original single-tenant version.
+    // CREATE TABLE IF NOT EXISTS alone does not add newly introduced columns.
+    await db.query(`
+      ALTER TABLE employees
+        ADD COLUMN IF NOT EXISTS organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
+        ADD COLUMN IF NOT EXISTS email VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'employee',
+        ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'active';
+    `);
+
+    // The legacy schema made employee_id globally unique. In a multi-tenant
+    // database each workspace needs its own ADMIN and may reuse employee IDs.
+    await db.query(`
+      DO $$
+      DECLARE constraint_name TEXT;
+      BEGIN
+        SELECT c.conname INTO constraint_name
+        FROM pg_constraint c
+        WHERE c.conrelid = 'employees'::regclass
+          AND c.contype = 'u'
+          AND c.conkey = ARRAY[
+            (SELECT attnum FROM pg_attribute
+             WHERE attrelid = 'employees'::regclass AND attname = 'employee_id')
+          ]::smallint[]
+        LIMIT 1;
+
+        IF constraint_name IS NOT NULL THEN
+          EXECUTE format('ALTER TABLE employees DROP CONSTRAINT %I', constraint_name);
+        END IF;
+      END $$;
+    `);
+
     // Create rooms table
     await db.query(`
       CREATE TABLE IF NOT EXISTS rooms (
@@ -58,6 +90,23 @@ async function initDb() {
         seen            BOOLEAN DEFAULT false,
         created_at      TIMESTAMP DEFAULT NOW()
       );
+    `);
+
+    await db.query(`
+      ALTER TABLE messages
+        ADD COLUMN IF NOT EXISTS organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
+        ADD COLUMN IF NOT EXISTS room_id INTEGER REFERENCES rooms(id) ON DELETE CASCADE;
+      ALTER TABLE messages ALTER COLUMN receiver DROP NOT NULL;
+    `);
+
+    await db.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_employees_org_employee_id
+      ON employees (organization_id, employee_id);
+    `);
+
+    await db.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_employees_org_email
+      ON employees (organization_id, email);
     `);
 
     // Create indexes for performance optimization
