@@ -5,6 +5,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const socketHandler = require("./socket/socketHandler");
 const db = require("./config/db");
+const initDb = require("./config/initDb");
 
 const app = express();
 
@@ -12,12 +13,9 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-    res.send("Office Alert Backend...");
+  res.send("Office Alert Backend...");
 });
 
-// =====================
-// ROUTES
-// =====================
 const authRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messages");
 const roomRoutes = require("./routes/rooms");
@@ -28,39 +26,34 @@ app.use("/messages", messageRoutes);
 app.use("/rooms", roomRoutes);
 app.use("/admin", adminRoutes);
 
-// =====================
-// SERVER + SOCKET.IO
-// =====================
 const server = http.createServer(app);
-
 const io = new Server(server, {
-    cors: {
-        origin: (origin, callback) => {
-            // Allow any origin dynamically to support localhost as well as multiple Render deployments
-            callback(null, true);
-        },
-        methods: ["GET", "POST"],
-        credentials: true
-    },
+  cors: {
+    origin: (origin, callback) => callback(null, true),
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
 });
 
 socketHandler(io);
 
-// =====================
-// START
-// =====================
 const PORT = process.env.PORT || 4000;
 
-server.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-});
-
-const initDb = require("./config/initDb");
-
-// DB connection check and schema initialization
-db.query("SELECT NOW()")
-  .then(async (res) => {
-    console.log("✅ PostgreSQL Connected:", res.rows[0]);
+async function startServer() {
+  try {
+    const result = await db.query("SELECT NOW()");
+    console.log("PostgreSQL connected:", result.rows[0]);
     await initDb();
-  })
-  .catch((err) => console.error("❌ PostgreSQL Error:", err));
+
+    server.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    // Failing the deployment is safer than serving every request against an
+    // outdated or only partially migrated database.
+    console.error("Server startup failed:", err);
+    process.exit(1);
+  }
+}
+
+startServer();

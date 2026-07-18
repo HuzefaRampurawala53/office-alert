@@ -128,6 +128,7 @@ async function initDb() {
     console.log("✅ Database schema initialized successfully.");
   } catch (err) {
     console.error("❌ Error initializing database schema:", err);
+    throw err;
   }
 }
 

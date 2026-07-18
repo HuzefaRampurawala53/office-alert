@@ -27,18 +27,49 @@ router.post("/register-company", async (req, res) => {
     return res.status(400).json({ error: "All fields are required." });
   }
 
-  const client = await db.connect();
+  const normalizedEmail = company_email.trim().toLowerCase();
+  let client;
   try {
+    client = await db.connect();
     await client.query("BEGIN");
+    // Serialize attempts for the same email to avoid concurrent duplicate
+    // registrations racing past the existence check.
+    await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [normalizedEmail]);
     // Check if company email already exists in organizations
     const existingOrg = await client.query(
       "SELECT id FROM organizations WHERE company_email = $1",
-      [company_email.trim().toLowerCase()]
+      [normalizedEmail]
     );
 
     if (existingOrg.rows.length > 0) {
-      await client.query("ROLLBACK");
-      return res.status(409).json({ error: "A company with this email is already registered." });
+      const existingOrganizationId = existingOrg.rows[0].id;
+      const existingUsers = await client.query(
+        `SELECT COUNT(*)::int AS employee_count,
+                COUNT(*) FILTER (WHERE role = 'admin')::int AS admin_count
+         FROM employees
+         WHERE organization_id = $1`,
+        [existingOrganizationId]
+      );
+
+      if (existingUsers.rows[0].admin_count > 0) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({ error: "A company with this email is already registered." });
+      }
+
+      if (existingUsers.rows[0].employee_count > 0) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({
+          error: "This workspace is incomplete but contains employee data. Contact support before retrying."
+        });
+      }
+
+      // An older non-transactional registration could create the organization
+      // and then fail before creating its admin. Remove only that unusable,
+      // admin-less workspace and recreate it atomically below.
+      await client.query(
+        "DELETE FROM organizations WHERE id = $1",
+        [existingOrganizationId]
+      );
     }
 
     // Generate unique workspace code
@@ -60,7 +91,7 @@ router.post("/register-company", async (req, res) => {
       `INSERT INTO organizations (company_name, company_email, workspace_code)
        VALUES ($1, $2, $3)
        RETURNING id, company_name, workspace_code`,
-      [company_name.trim(), company_email.trim().toLowerCase(), workspaceCode]
+      [company_name.trim(), normalizedEmail, workspaceCode]
     );
 
     const organization = orgResult.rows[0];
@@ -71,7 +102,7 @@ router.post("/register-company", async (req, res) => {
       `INSERT INTO employees (organization_id, employee_id, name, email, password_hash, role, department)
        VALUES ($1, 'ADMIN', $2, $3, $4, 'admin', 'Management')
        RETURNING id, employee_id, name, email, role, department`,
-      [organization.id, admin_name.trim(), company_email.trim().toLowerCase(), passwordHash]
+      [organization.id, admin_name.trim(), normalizedEmail, passwordHash]
     );
 
     const adminEmployee = adminResult.rows[0];
@@ -94,11 +125,17 @@ router.post("/register-company", async (req, res) => {
     });
 
   } catch (err) {
-    await client.query("ROLLBACK");
+    if (client) {
+      try {
+        await client.query("ROLLBACK");
+      } catch (rollbackError) {
+        console.error("Company registration rollback error:", rollbackError);
+      }
+    }
     console.error("Company registration error:", err);
     res.status(500).json({ error: "Server error during company registration." });
   } finally {
-    client.release();
+    client?.release();
   }
 });
 
