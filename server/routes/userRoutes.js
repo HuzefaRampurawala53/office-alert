@@ -71,12 +71,21 @@ router.post("/register-company", async (req, res) => {
       [organization.id, admin_name.trim(), company_email.trim().toLowerCase(), passwordHash]
     );
 
+    const adminEmployee = adminResult.rows[0];
+
+    // Create default 'General' room for the workspace
+    await db.query(
+      `INSERT INTO rooms (organization_id, room_name, created_by)
+       VALUES ($1, 'General', $2)`,
+      [organization.id, adminEmployee.id]
+    );
+
     res.status(201).json({
       success: true,
       message: "Company registered successfully.",
       workspace_code: organization.workspace_code,
       organization,
-      admin: adminResult.rows[0]
+      admin: adminEmployee
     });
 
   } catch (err) {

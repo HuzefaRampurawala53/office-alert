@@ -1,34 +1,35 @@
 import { useEffect, useState, useRef } from "react";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import { createSocket, disconnectSocket, getSocket } from "./services/socket";
+import { createSocket, disconnectSocket } from "./services/socket";
 
 function App() {
-  const [employee, setEmployee] = useState(null);
-  const [socket, setSocket] = useState(null);
-  const socketRef = useRef(null);
-
-  // Restore session from localStorage
-  useEffect(() => {
-    const savedToken = localStorage.getItem("token");
+  const [employee, setEmployee] = useState(() => {
     const savedEmployee = localStorage.getItem("employee");
-
-    if (savedToken && savedEmployee) {
+    if (savedEmployee) {
       try {
-        const emp = JSON.parse(savedEmployee);
-        setEmployee(emp);
-
-        // Reconnect socket with saved token
-        const sock = createSocket(savedToken);
-        socketRef.current = sock;
-        setSocket(sock);
+        return JSON.parse(savedEmployee);
       } catch {
-        // Corrupted data — clear and go to login
         localStorage.removeItem("token");
         localStorage.removeItem("employee");
       }
     }
-  }, []);
+    return null;
+  });
+
+  const [socket, setSocket] = useState(() => {
+    const savedToken = localStorage.getItem("token");
+    if (savedToken && employee) {
+      return createSocket(savedToken);
+    }
+    return null;
+  });
+
+  const socketRef = useRef(socket);
+
+  useEffect(() => {
+    socketRef.current = socket;
+  }, [socket]);
 
   // Ask for notification permission
   useEffect(() => {

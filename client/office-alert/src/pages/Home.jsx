@@ -89,11 +89,37 @@ function Home({ employee, socket, onLogout }) {
   };
 
   useEffect(() => {
-    loadChatData();
+    let active = true;
+    const fetchChatData = async () => {
+      try {
+        const roomsRes = await api.get("/rooms");
+        if (active) setChannels(roomsRes.data);
+        const coworkersRes = await api.get("/auth/members");
+        if (active) setCoworkers(coworkersRes.data);
+      } catch (err) {
+        console.error("Error loading workspace data:", err);
+      }
+    };
+    const fetchAdminData = async () => {
+      try {
+        const statsRes = await api.get("/admin/stats");
+        if (active) setAdminStats(statsRes.data);
+        const employeesRes = await api.get("/admin/employees");
+        if (active) setAllEmployees(employeesRes.data);
+      } catch (err) {
+        console.error("Error loading admin data:", err);
+      }
+    };
+
+    fetchChatData();
     if (isAdmin) {
-      loadAdminData();
+      fetchAdminData();
     }
-  }, [employee]);
+
+    return () => {
+      active = false;
+    };
+  }, [employee, isAdmin]);
 
   // ===========================
   // BROWSER CLOSING PRESENCE RESET
@@ -182,8 +208,8 @@ function Home({ employee, socket, onLogout }) {
       setTypingUser(data); // { from, name, room_id }
     });
 
-    socket.on("user_stop_typing", () => {
-      setTypingUser(null);
+    socket.on("user_stop_typing", (data) => {
+      setTypingUser((prev) => (prev && prev.from === data?.from ? null : prev));
     });
 
     return () => {

@@ -4,7 +4,8 @@
   "scripts": {
     "client": "npm run dev --prefix client/office-alert",
     "server": "npm run dev --prefix server",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "db:wipe": "npm run db:wipe --prefix server"
   },
   "dependencies": {
     "cors": "^2.8.6",

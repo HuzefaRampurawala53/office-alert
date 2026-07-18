@@ -5,11 +5,14 @@
 .login-container {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   background: transparent;
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   padding: 20px;
+  overflow-y: auto !important;
+  box-sizing: border-box;
 }
 
 .login-card {
