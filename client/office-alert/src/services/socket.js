@@ -21,7 +21,7 @@ export function createSocket(token) {
 
   const socketURL = isLocalhost
     ? "http://localhost:4000"
-    : "https://office-alert.onrender.com";
+    : import.meta.env.VITE_API_URL || "https://office-alert.onrender.com";
 
   const presenceStatus = localStorage.getItem("presence_status") || "online";
 
