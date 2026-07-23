@@ -139,7 +139,6 @@ export function BeamsBackground({
             if (!canvas || !ctx) return;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.filter = "blur(35px)";
 
             const totalBeams = beamsRef.current.length;
             beamsRef.current.forEach((beam, index) => {
@@ -191,7 +190,7 @@ export function BeamsBackground({
                     left: 0,
                     width: "100%",
                     height: "100%",
-                    filter: "blur(15px)",
+                    filter: "blur(50px)",
                     pointerEvents: "none",
                 }}
             />

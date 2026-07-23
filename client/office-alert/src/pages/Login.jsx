@@ -1,5 +1,5 @@
 import "./Login.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../services/api";
 import { BeamsBackground } from "../components/ui/beams-background";
 import SplitText from "./SplitText";
@@ -7,39 +7,63 @@ import { motion } from "motion/react";
 import logo from "../assets/logo.png";
 
 function Login({ onLogin }) {
-  const [isIntro, setIsIntro] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const getSessionValue = (key, defaultValue) => {
+    const val = sessionStorage.getItem(key);
+    if (val === null) return defaultValue;
+    try {
+      return JSON.parse(val);
+    } catch {
+      return val;
+    }
+  };
+
+  const shouldSkipIntro = () => {
+    return (
+      sessionStorage.getItem("skipLoginIntro") === "true" ||
+      !!(
+        getSessionValue("login_employeeId", "") ||
+        getSessionValue("login_workspaceCode", "") ||
+        getSessionValue("login_fullName", "") ||
+        getSessionValue("login_newEmployeeId", "") ||
+        getSessionValue("login_companyName", "")
+      )
+    );
+  };
+
+  const [isIntro, setIsIntro] = useState(() => !shouldSkipIntro());
+  const [showForm, setShowForm] = useState(() => shouldSkipIntro());
 
   const handleAnimationComplete = () => {
     console.log('All letters have animated!');
     setTimeout(() => {
       setIsIntro(false);
+      sessionStorage.setItem("skipLoginIntro", "true");
       setTimeout(() => {
         setShowForm(true);
       }, 500);
     }, 1000);
   };
 
-  const [tab, setTab] = useState("login"); // "login", "join", "register-company"
+  const [tab, setTab] = useState(() => getSessionValue("login_tab", "login"));
   
   // Login Form States
-  const [employeeId, setEmployeeId] = useState("");
-  const [password, setPassword] = useState("");
+  const [employeeId, setEmployeeId] = useState(() => getSessionValue("login_employeeId", ""));
+  const [password, setPassword] = useState(() => getSessionValue("login_password", ""));
   
   // Workspace Join States
-  const [workspaceCode, setWorkspaceCode] = useState("");
-  const [workspaceVerified, setWorkspaceVerified] = useState(false);
-  const [verifiedOrg, setVerifiedOrg] = useState(null);
-  const [fullName, setFullName] = useState("");
-  const [newEmployeeId, setNewEmployeeId] = useState("");
-  const [department, setDepartment] = useState("General");
-  const [newPassword, setNewPassword] = useState("");
+  const [workspaceCode, setWorkspaceCode] = useState(() => getSessionValue("login_workspaceCode", ""));
+  const [workspaceVerified, setWorkspaceVerified] = useState(() => getSessionValue("login_workspaceVerified", false));
+  const [verifiedOrg, setVerifiedOrg] = useState(() => getSessionValue("login_verifiedOrg", null));
+  const [fullName, setFullName] = useState(() => getSessionValue("login_fullName", ""));
+  const [newEmployeeId, setNewEmployeeId] = useState(() => getSessionValue("login_newEmployeeId", ""));
+  const [department, setDepartment] = useState(() => getSessionValue("login_department", "General"));
+  const [newPassword, setNewPassword] = useState(() => getSessionValue("login_newPassword", ""));
   
   // Company Registration States
-  const [companyName, setCompanyName] = useState("");
-  const [companyEmail, setCompanyEmail] = useState("");
-  const [adminName, setAdminName] = useState("");
-  const [adminPassword, setAdminPassword] = useState("");
+  const [companyName, setCompanyName] = useState(() => getSessionValue("login_companyName", ""));
+  const [companyEmail, setCompanyEmail] = useState(() => getSessionValue("login_companyEmail", ""));
+  const [adminName, setAdminName] = useState(() => getSessionValue("login_adminName", ""));
+  const [adminPassword, setAdminPassword] = useState(() => getSessionValue("login_adminPassword", ""));
   const [createdWorkspaceCode, setCreatedWorkspaceCode] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -47,6 +71,39 @@ function Login({ onLogin }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Sync form states to sessionStorage on change
+  useEffect(() => {
+    sessionStorage.setItem("login_tab", JSON.stringify(tab));
+    sessionStorage.setItem("login_employeeId", JSON.stringify(employeeId));
+    sessionStorage.setItem("login_password", JSON.stringify(password));
+    sessionStorage.setItem("login_workspaceCode", JSON.stringify(workspaceCode));
+    sessionStorage.setItem("login_workspaceVerified", JSON.stringify(workspaceVerified));
+    sessionStorage.setItem("login_verifiedOrg", JSON.stringify(verifiedOrg));
+    sessionStorage.setItem("login_fullName", JSON.stringify(fullName));
+    sessionStorage.setItem("login_newEmployeeId", JSON.stringify(newEmployeeId));
+    sessionStorage.setItem("login_department", JSON.stringify(department));
+    sessionStorage.setItem("login_newPassword", JSON.stringify(newPassword));
+    sessionStorage.setItem("login_companyName", JSON.stringify(companyName));
+    sessionStorage.setItem("login_companyEmail", JSON.stringify(companyEmail));
+    sessionStorage.setItem("login_adminName", JSON.stringify(adminName));
+    sessionStorage.setItem("login_adminPassword", JSON.stringify(adminPassword));
+  }, [
+    tab, employeeId, password, workspaceCode, workspaceVerified, verifiedOrg,
+    fullName, newEmployeeId, department, newPassword, companyName, companyEmail,
+    adminName, adminPassword
+  ]);
+
+  const clearSessionForm = () => {
+    const keys = [
+      "login_tab", "login_employeeId", "login_password", "login_workspaceCode",
+      "login_workspaceVerified", "login_verifiedOrg", "login_fullName",
+      "login_newEmployeeId", "login_department", "login_newPassword",
+      "login_companyName", "login_companyEmail", "login_adminName",
+      "login_adminPassword"
+    ];
+    keys.forEach(key => sessionStorage.removeItem(key));
+  };
 
   // Handle Login
   const handleLogin = async (e) => {
@@ -78,6 +135,7 @@ function Login({ onLogin }) {
       localStorage.setItem("employee", JSON.stringify(employee));
 
       onLogin(employee, token);
+      clearSessionForm();
     } catch (err) {
       const message = err.response?.data?.error || "Invalid Employee ID/Email or password.";
       setError(message);
@@ -149,6 +207,7 @@ function Login({ onLogin }) {
         localStorage.setItem("token", token);
         localStorage.setItem("employee", JSON.stringify(employee));
         onLogin(employee, token);
+        clearSessionForm();
       }
     } catch (err) {
       const message = err.response?.data?.error || "Registration failed. Try again.";
@@ -233,21 +292,25 @@ function Login({ onLogin }) {
             }}
             transition={{ duration: 0.8, ease: "easeInOut" }}
           >
-            <SplitText
-              text="Office Alert"
-              className="font-semibold text-center tracking-tighter"
-              delay={50}
-              duration={1.00}
-              ease="power3.out"
-              splitType="chars"
-              from={{ opacity: 0, y: 40 }}
-              to={{ opacity: 1, y: 0 }}
-              threshold={0.1}
-              rootMargin="-100px"
-              textAlign="center"
-              onLetterAnimationComplete={handleAnimationComplete}
-              showCallback
-            />
+            {isIntro ? (
+              <SplitText
+                text="Office Alert"
+                className="font-semibold text-center tracking-tighter"
+                delay={50}
+                duration={1.00}
+                ease="power3.out"
+                splitType="chars"
+                from={{ opacity: 0, y: 40 }}
+                to={{ opacity: 1, y: 0 }}
+                threshold={0.1}
+                rootMargin="-100px"
+                textAlign="center"
+                onLetterAnimationComplete={handleAnimationComplete}
+                showCallback
+              />
+            ) : (
+              <span className="font-semibold text-center tracking-tighter">Office Alert</span>
+            )}
           </motion.h1>
           
           {!isIntro && (

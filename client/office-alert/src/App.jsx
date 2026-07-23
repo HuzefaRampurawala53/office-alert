@@ -55,6 +55,7 @@ function App() {
 
     localStorage.removeItem("token");
     localStorage.removeItem("employee");
+    sessionStorage.setItem("skipLoginIntro", "true");
     setEmployee(null);
   };
 

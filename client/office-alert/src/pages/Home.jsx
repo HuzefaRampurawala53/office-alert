@@ -8,6 +8,7 @@ import UserCard from "../components/UserCard";
 import Notification from "../components/Notifications/Notification";
 import ChatWindow from "../components/Chat/ChatWindow";
 import logo from "../assets/logo.png";
+import Sidebar from "../components/Sidebar/Sidebar";
 
 function Home({ employee, socket, onLogout }) {
   const [activeTab, setActiveTab] = useState("chat"); // "chat" or "admin" (if admin)
@@ -461,6 +462,11 @@ function Home({ employee, socket, onLogout }) {
       {activeTab === "chat" && (
         <div className="chat-layout">
           <div className="sidebar-chat-panel">
+            {/* Workspace Navigation Sidebar */}
+            <div className="sidebar-section">
+              <Sidebar />
+            </div>
+
             {/* Channels/Rooms Section */}
             <div className="sidebar-section">
               <h3 className="section-title"># CHANNELS ({channels.length})</h3>
